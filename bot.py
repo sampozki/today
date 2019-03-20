@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright: Sampo Pelto 2019
 
-import logging
 from telegram import Bot
 from time import gmtime, strftime
 from configparser import ConfigParser
@@ -11,12 +10,12 @@ import requests
 import re
 
 
-def testsend(bot, msg, chat_id):
+def send(bot, msg, chat_id):
     bot.send_message(chat_id=chat_id, text=str(msg))
 
 
 def pvm():
-    return strftime("Tänään on %d.%m.", gmtime())
+    return strftime("Tänään on %d.%m. ", gmtime())
 
 
 def saa(owm):
@@ -41,7 +40,7 @@ def saa(owm):
     else:
         keli = condition
 
-    return "Sää: " + keli + " ja " + temperature
+    return f"Sää: {keli} ja {temperature}. "
 
 
 def nimi():
@@ -56,19 +55,19 @@ def nimi():
         return "Nimipäivät: " + ", ".join(nimet)
     elif len(nimet) == 0:
         return "Nimipäivä: " + ", ".join(nimet)
-    return "" 
-
-    
+    return "Ei nimipäiviä!" 
 
 
 def liputus():
-    return "Liputuspäivä: "
+
+    urli = "https://www.xn--liputuspivt-s8ac.fi/"
+
+    soup = BeautifulSoup(requests.get(urli).content, "html.parser")
+
+    return "Liputuspäivä: " + str(soup.find('h2')).split(">")[1].split("</")[0]
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    logger = logging.getLogger()
-    logger.setLevel(logging.ERROR)
 
     cfg = ConfigParser()
     cfg.read('env.cfg')
@@ -77,10 +76,10 @@ def main():
     chat_id = cfg['TELEGRAM']['id']
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
-    viesti = pvm() + "\n" + nimi() + "\n" + \
-             saa(owm) + "\n" + liputus()
+    viesti = pvm() + "\n" + saa(owm) + "\n" + \
+             nimi() + "\n" + liputus()
 
-    testsend(bot, viesti, chat_id)
+    send(bot, viesti, chat_id)
     print(viesti)
 
 
