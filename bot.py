@@ -3,7 +3,7 @@
 
 from telegram import Bot
 from time import gmtime, strftime
-import datetime
+from datetime import timedelta, datetime
 from configparser import ConfigParser
 import pyowm
 from bs4 import BeautifulSoup
@@ -24,25 +24,34 @@ def saa(owm):
     observation = owm.weather_at_place('Tampere,FI')
     w = observation.get_weather()
 
+    #tiettyyn kellonaikaan
+    forecaster = owm.three_hours_forecast('Tampere,FI')
+    tempit = []
+    ajat = [1, 5, 12]
+    for kellot in ajat:
+        time = datetime.now() + timedelta(days=0, hours=kellot)
+        weather = forecaster.get_weather_at(time)
+        temppis = weather.get_temperature(unit='celsius')['temp']
+        tempit.append(str(round(temppis,1)) + "°C")
+
     condition = str(w).split('status=')[1][:-1].lower().split(",")[0]
     keli = condition
 
-    temperature = str(int(w.get_temperature('celsius')['temp'])) + "°C"
-
     if condition == "clouds":
-        keli = "Pilvistä"
+        keli = "Pilvistä ☁️☁️"
     elif condition == "fog":
-        keli = "Sumuista"
+        keli = "Sumuista 🌫️🌫️"
     elif condition == "snow":
-        keli = "Lumista"
-    elif condition == "snow":
-        keli = "Vetistä"
+        keli = "Lumista ❄️❄️"
+    elif condition == "rain":
+        keli = "Vetistä 🌧️🌧️"
     elif condition == "clear":
-        keli = "Aurinkoista"
+        keli = "Aurinkoista ☀️☀️"
     else:
         keli = condition
 
-    return "Sää: {0} ja {1}. ".format(keli, temperature)
+
+    return "Sää: {0} ja {1}. ".format(keli, ", ".join(tempit))
 
 
 def nimi():
@@ -82,15 +91,15 @@ def fakta(d, m):
     a = a.replace("</li>", "??!!??")
     a = re.sub('\s+', ' ', re.sub(r'<.*?>', "", a))
     a = a.replace("<span", "").replace('"> Muokkaa', "")
-    
     lista = a.split("??!!??")
+    del lista[-1]
+    return "Päivän fakta:" + str(choice(lista))
 
-    return choice(lista)
 
 
 def main():
 
-    today = datetime.datetime.now()
+    today = datetime.now()
 
     cfg = ConfigParser()
     cfg.read('env.cfg')
@@ -98,10 +107,10 @@ def main():
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
     # TEStI
-    #chat_id = cfg['TELEGRAM']['id']
+    chat_id = cfg['TELEGRAM']['id']
     
     # TUOTANTO
-    chat_id = cfg['TELEGRAM']['real']
+    #chat_id = cfg['TELEGRAM']['real']
     
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
