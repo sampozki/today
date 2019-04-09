@@ -74,8 +74,12 @@ def liputus():
     urli = "https://www.xn--liputuspivt-s8ac.fi/"
 
     soup = BeautifulSoup(requests.get(urli).content, "html.parser")
+    paiva = str(soup.find('h2')).split(">")[1].split("</")[0]
 
-    return str(soup.find('h2')).split(">")[1].split("</")[0]
+    if paiva == "Tänään ei ole liputuspäivä!":
+        return paiva
+    else:
+        return str(soup.find('h2')).split("<strong>")[1].split("</strong>")[0].split(". ")[1]
 
 
 def fakta(d, m):
@@ -92,6 +96,7 @@ def fakta(d, m):
     a = re.sub('\s+', ' ', re.sub(r'<.*?>', "", a))
     a = a.replace("<span", "").replace('"> Muokkaa', "")
     lista = a.split("??!!??")
+    # lista = re.sub('\s+', ' ', re.sub(r'<.*?>', "", soup.prettify().split("Tapahtumia")[3].split('id="Syn')[0].replace("</li>", "??!!??"))).replace("<span", "").replace('"> Muokkaa', "").split("??!!??")
     del lista[-1]
     return "Päivän fakta:" + str(choice(lista))
 
@@ -119,7 +124,7 @@ def main():
              fakta(today.day, today.month)
 
     send(bot, viesti, chat_id)
-    print(viesti)
+    # print(viesti)
 
 
 if __name__ == "__main__":
