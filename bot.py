@@ -93,13 +93,14 @@ def fakta(d, m):
 
     lista = []
     a = soup.prettify()
-    a = a.split("Tapahtumia")[3].split('id="Syn')[0]
+    a = a.split("Tapahtumia")[5].split('id="syn')[0]
     a = a.replace("</li>", "??!!??")
     a = re.sub('\s+', ' ', re.sub(r'<.*?>', "", a))
     a = a.replace("<span", "").replace('"> Muokkaa', "")
-    lista = a.split("??!!??")
-    # lista = re.sub('\s+', ' ', re.sub(r'<.*?>', "", soup.prettify().split("Tapahtumia")[3].split('id="Syn')[0].replace("</li>", "??!!??"))).replace("<span", "").replace('"> Muokkaa', "").split("??!!??")
+    a = a.split("Syntyneitä")
+    lista = a[0].split("??!!??")
     del lista[-1]
+    
     if len(lista) == 0:
         return "Ei faktoja :("
     else:
