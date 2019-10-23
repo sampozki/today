@@ -27,7 +27,7 @@ def saa(owm):
     #tiettyyn kellonaikaan
     forecaster = owm.three_hours_forecast('Tampere,FI')
     tempit = []
-    ajat = [1, 5, 12]
+    ajat = [1, 5, 12, 17]
     for kellot in ajat:
         time = datetime.now() + timedelta(days=0, hours=kellot)
         weather = forecaster.get_weather_at(time)
@@ -47,6 +47,8 @@ def saa(owm):
         keli = "Vetistä 🌧️🌧️"
     elif condition == "clear":
         keli = "Aurinkoista ☀️☀️"
+    elif condition == "mist":
+        keli = "Usvaista 🌫️🌫️"
     else:
         keli = condition
 
@@ -61,12 +63,12 @@ def nimi():
 
     kokonainen = str(soup.find('table'))
     nimet = re.findall(r'>([a-zA-Z]*)<\/a>', kokonainen)
-    
+
     if len(nimet) > 1:
         return "Nimipäivät: " + ", ".join(nimet)
     elif len(nimet) == 1:
         return "Nimipäivä: " + ", ".join(nimet)
-    return "Ei nimipäiviä!" 
+    return "Ei nimipäiviä!"
 
 
 def liputus():
@@ -76,10 +78,10 @@ def liputus():
     soup = BeautifulSoup(requests.get(urli).content, "html.parser")
     paiva = str(soup.find('h2')).split(">")[1].split("</")[0]
 
-    if paiva == "Tänään ei ole liputuspäivä!":
+    if paiva == "Tänään ei ole liputuspäivä.":
         return paiva
     else:
-        return str(soup.find('h2')).split("<strong>")[1].split("</strong>")[0].split(". ")[1]
+        return "Tänään on " +  str(soup.find('h2')).split("<strong>")[1].split("</strong>")[0].split(". ")[1] + str(choice([".", "!"]))
 
 
 def fakta(d, m):
@@ -98,8 +100,10 @@ def fakta(d, m):
     lista = a.split("??!!??")
     # lista = re.sub('\s+', ' ', re.sub(r'<.*?>', "", soup.prettify().split("Tapahtumia")[3].split('id="Syn')[0].replace("</li>", "??!!??"))).replace("<span", "").replace('"> Muokkaa', "").split("??!!??")
     del lista[-1]
-    return "Päivän fakta:" + str(choice(lista))
-
+    if len(lista) == 0:
+        return "Ei faktoja :("
+    else:
+        return "Päivän fakta:" + str(choice(lista))
 
 
 def main():
@@ -107,21 +111,20 @@ def main():
     today = datetime.now()
 
     cfg = ConfigParser()
-    cfg.read('env.cfg')
+    cfg.read('/home/sampo/Coding/python/today/env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
     # TEStI
-    chat_id = cfg['TELEGRAM']['id']
-    
+    # chat_id = cfg['TELEGRAM']['id']
+
     # TUOTANTO
-    #chat_id = cfg['TELEGRAM']['real']
-    
+    chat_id = cfg['TELEGRAM']['real']
+
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
     viesti = pvm() + "\n" + saa(owm) + "\n" + \
-             nimi() + "\n" + liputus() + "\n" + \
-             fakta(today.day, today.month)
+             nimi() + "\n" + fakta(today.day, today.month)
 
     send(bot, viesti, chat_id)
     # print(viesti)
