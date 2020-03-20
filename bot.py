@@ -57,6 +57,7 @@ def saa(owm):
 
 
 def nimi():
+
     urli = "https://www.nimipaivat.fi"
 
     soup = BeautifulSoup(requests.get(urli).content, "html.parser")
@@ -73,15 +74,16 @@ def nimi():
 
 def liputus():
 
-    urli = "https://www.xn--liputuspivt-s8ac.fi/"
+    # Thank mr https://github.com/nikosalonen/flagdays
 
-    soup = BeautifulSoup(requests.get(urli).content, "html.parser")
-    paiva = str(soup.find('h2')).split(">")[1].split("</")[0]
+    lippu = requests.get('https://gentle-dawn-65084.herokuapp.com/').json()
 
-    if paiva == "Tänään ei ole liputuspäivä.":
-        return paiva
+    paiva = lippu["info"]
+    
+    if paiva == "":
+        return "Tänään ei ole liputuspäivä. "
     else:
-        return "Tänään on " +  str(soup.find('h2')).split("<strong>")[1].split("</strong>")[0].split(". ")[1] + str(choice([".", "!"]))
+        return paiva
 
 
 def fakta(d, m):
@@ -112,20 +114,25 @@ def main():
     today = datetime.now()
 
     cfg = ConfigParser()
-    cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    #cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
     # TEStI
-    # chat_id = cfg['TELEGRAM']['id']
+    chat_id = cfg['TELEGRAM']['id']
 
     # TUOTANTO
-    chat_id = cfg['TELEGRAM']['real']
+    #chat_id = cfg['TELEGRAM']['real']
 
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
-    viesti = pvm() + "\n" + saa(owm) + "\n" + \
-             nimi() + "\n" + fakta(today.day, today.month)
+    viesti = pvm() + "\n\n" + saa(owm) + "\n\n" + \
+             nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
+             liputus() + "\n\n" 
+
+             # + \
+             # "Covid-19: sairaita, kuolleita, parantuneita"
 
     send(bot, viesti, chat_id)
     # print(viesti)
