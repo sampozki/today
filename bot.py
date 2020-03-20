@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from random import choice
 import requests
 import re
+from sys import argv
 
 
 def send(bot, msg, chat_id):
@@ -72,20 +73,6 @@ def nimi():
     return "Ei nimipäiviä!"
 
 
-def liputus():
-
-    # Thank mr https://github.com/nikosalonen/flagdays
-
-    lippu = requests.get('https://gentle-dawn-65084.herokuapp.com/').json()
-
-    paiva = lippu["info"]
-    
-    if paiva == "":
-        return "Tänään ei ole liputuspäivä. "
-    else:
-        return paiva
-
-
 def fakta(d, m):
     kuukausidict = {1: 'tammikuuta', 2: 'helmikuuta', 3: 'maaliskuuta', 4: 'huhtikuuta', 5: 'toukokuuta', 6: 'kesäkuuta', 7: 'heinäkuuta', 8: 'elokuuta', 9: 'syyskuuta', 10: 'lokakuuta', 11: 'marraskuuta', 12: 'joulukuuta'}
 
@@ -109,30 +96,62 @@ def fakta(d, m):
         return "Päivän fakta:" + str(choice(lista))
 
 
+def liputus():
+
+    # Thank mr https://github.com/nikosalonen/flagdays
+    url = 'https://gentle-dawn-65084.herokuapp.com/'
+
+    lippu = requests.get(url).json()
+
+    paiva = lippu["info"]
+    
+    if paiva == "":
+        return "Tänään ei ole liputuspäivä. "
+    else:
+        return paiva
+
+
+def korona(suomi):
+
+    if suomi:
+        url = "https://coronavirus-19-api.herokuapp.com/countries/Finland"
+        teksti = "Covid-19 Suomessa: "
+    else:
+        url = "https://coronavirus-19-api.herokuapp.com/all"
+        teksti = "Covid-19 Maailmalla: "
+
+    covid = requests.get(url).json()
+
+    return(teksti + "\nSairastuneita: " + str(covid["cases"]) + "\nKuolleita: " + str(covid["deaths"]) + "\nParantuneita: " + str(covid["recovered"]))
+
+
 def main():
 
     today = datetime.now()
-
+    
     cfg = ConfigParser()
     #cfg.read('/home/sampo/Coding/python/today/env.cfg')
     cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
-    # TEStI
-    chat_id = cfg['TELEGRAM']['id']
+    # Paljon parempi kuin ennen
+    if len(argv) == 1:
+        chat_id = cfg['TELEGRAM']['id']
+    else:
+        if argv[1] == "tuotanto":
+            chat_id = cfg['TELEGRAM']['real']
+        else:
+            chat_id = cfg['TELEGRAM']['id']
 
-    # TUOTANTO
-    #chat_id = cfg['TELEGRAM']['real']
 
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
     viesti = pvm() + "\n\n" + saa(owm) + "\n\n" + \
              nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
-             liputus() + "\n\n" 
-
-             # + \
-             # "Covid-19: sairaita, kuolleita, parantuneita"
+             liputus() + "\n\n" + \
+             korona(True) + "\n\n" + \
+             korona(False) + "\n\n"
 
     send(bot, viesti, chat_id)
     # print(viesti)
