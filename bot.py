@@ -18,7 +18,7 @@ def send(bot, msg, chat_id):
 
 
 def pvm():
-    return strftime("Tänään on %d.%m. ", gmtime())
+    return strftime("Tänään on %d.%m.", gmtime())
 
 
 def saa(owm):
@@ -53,8 +53,15 @@ def saa(owm):
     else:
         keli = condition
 
+    aurinkonousee = w.get_sunrise_time()+7200
+    aurinkolaskee = w.get_sunset_time()+7200
 
-    return "Sää: {0} ja {1}. ".format(keli, ", ".join(tempit))
+    aurinkonousee = datetime.utcfromtimestamp(aurinkonousee).strftime("%H:%M")
+    aurinkolaskee = datetime.utcfromtimestamp(aurinkolaskee).strftime("%H:%M")
+
+
+
+    return "Sää: {0} \n🌡️: {1} \n".format(keli, ", ".join(tempit) + "\n🌅: " + str(aurinkonousee) + "\n🌇: "+ str(aurinkolaskee))
 
 
 def nimi():
@@ -150,7 +157,7 @@ def main():
 
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
-    viesti = pvm() + "\n\n" + saa(owm) + "\n\n" + \
+    viesti = pvm() + "\n\n" + saa(owm) + "\n" + \
              nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
              liputus() + "\n\n" + \
              korona(True) + "\n\n" + \
