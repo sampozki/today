@@ -122,7 +122,10 @@ def korona(suomi):
 
     covid = requests.get(url).json()
 
-    return(teksti + "\nSairastuneita: " + str(covid["cases"]) + "\nKuolleita: " + str(covid["deaths"]) + "\nParantuneita: " + str(covid["recovered"]))
+    return(teksti + "\nSairastuneita: " + str(covid["cases"]) + \
+                    "\nKuolleita: " + str(covid["deaths"]) + \
+                    "\nParantuneita: " + str(covid["recovered"]) + \
+                    "\nKuolleisuus-%: " + str(round(covid["deaths"] / covid["cases"],4)*100))
 
 
 def main():
