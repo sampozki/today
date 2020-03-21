@@ -132,7 +132,7 @@ def korona(suomi):
     return(teksti + "\nSairastuneita: " + str(covid["cases"]) + \
                     "\nKuolleita: " + str(covid["deaths"]) + \
                     "\nParantuneita: " + str(covid["recovered"]) + \
-                    "\nKuolleisuus-%: " + str(round(covid["deaths"] / covid["cases"],4)*100))
+                    "\nKuolleisuus-%: " + str((round(covid["deaths"] / covid["cases"]*100,2))))
 
 
 def main():
