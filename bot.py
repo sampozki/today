@@ -140,8 +140,8 @@ def main():
     today = datetime.now()
     
     cfg = ConfigParser()
-    #cfg.read('/home/sampo/Coding/python/today/env.cfg')
-    cfg.read('env.cfg')
+    cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    #cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
@@ -159,9 +159,9 @@ def main():
 
     viesti = pvm() + "\n\n" + saa(owm) + "\n" + \
              nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
-             liputus() + "\n\n" + \
-             korona(True) + "\n\n" + \
-             korona(False) + "\n\n"
+             liputus() + "\n\n"
+             # korona(True) + "\n\n" + \
+             # korona(False) + "\n\n"
 
     send(bot, viesti, chat_id)
     # print(viesti)
