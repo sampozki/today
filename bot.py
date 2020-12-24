@@ -50,6 +50,8 @@ def saa(owm):
         keli = "Aurinkoista ☀️☀️"
     elif condition == "mist":
         keli = "Usvaista 🌫️🌫️"
+    elif condition == "drizzle":
+        keli = "tihkuista 🌧️"
     else:
         keli = condition
 
@@ -107,13 +109,16 @@ def liputus():
 
     # Thank mr https://github.com/nikosalonen/flagdays
     url = 'https://gentle-dawn-65084.herokuapp.com/'
-
-    lippu = requests.get(url).json()
+    
+    try:
+        lippu = requests.get(url).json()
+    except:
+        return "Tänään ei ole liputuspäivä. (api is bork)"
 
     paiva = lippu["info"]
     
     if paiva == "":
-        return "Tänään ei ole liputuspäivä. "
+        return "Tänään ei ole liputuspäivä. (api is bork)"
     else:
         return paiva
 
@@ -160,8 +165,8 @@ def main():
     viesti = pvm() + "\n\n" + saa(owm) + "\n" + \
              nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
              liputus() + "\n\n"
-             # korona(True) + "\n\n" + \
-             # korona(False) + "\n\n"
+             #korona(True) + "\n\n" + \
+             #korona(False) + "\n\n"
 
     send(bot, viesti, chat_id)
     # print(viesti)
