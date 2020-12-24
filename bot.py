@@ -22,21 +22,26 @@ def pvm():
 
 
 def saa(owm):
-    observation = owm.weather_at_place('Tampere,FI')
-    w = observation.get_weather()
+    # Likainen try except :)
+    try:
+        observation = owm.weather_at_place('Tampere,FI')
+        w = observation.get_weather()
 
-    #tiettyyn kellonaikaan
-    forecaster = owm.three_hours_forecast('Tampere,FI')
-    tempit = []
-    ajat = [1, 5, 12, 17]
-    for kellot in ajat:
-        time = datetime.now() + timedelta(days=0, hours=kellot)
-        weather = forecaster.get_weather_at(time)
-        temppis = weather.get_temperature(unit='celsius')['temp']
-        tempit.append(str(round(temppis,1)) + "°C")
+        # Tiettyyn kellonaikaan
+        forecaster = owm.three_hours_forecast('Tampere,FI')
+        tempit = []
+        ajat = [1, 5, 12, 17]
+        for kellot in ajat:
+            time = datetime.now() + timedelta(days=0, hours=kellot)
+            weather = forecaster.get_weather_at(time)
+            temppis = weather.get_temperature(unit='celsius')['temp']
+            tempit.append(str(round(temppis,1)) + "°C")
 
-    condition = str(w).split('status=')[1][:-1].lower().split(",")[0]
-    keli = condition
+        condition = str(w).split('status=')[1][:-1].lower().split(",")[0]
+        keli = condition
+
+    except Exception as e:
+        return "Sään hakemisessa tapahtui virhe :("
 
     if condition == "clouds":
         keli = "Pilvistä ☁️☁️"
