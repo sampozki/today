@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright: Sampo Pelto 2019
+# Copyright: Sampo Pelto 2019 - 2020
 
 from telegram import Bot
 from time import gmtime, strftime
@@ -18,10 +18,11 @@ def send(bot, msg, chat_id):
 
 
 def pvm():
-    return strftime("Tänään on %d.%m.", gmtime())
+    return strftime("Tänään on %Y-%m-%d.", gmtime())
 
 
 def saa(owm):
+
     # Likainen try except :)
     try:
         mgr = owm.weather_manager()
@@ -48,31 +49,30 @@ def saa(owm):
         return "Sään hakemisessa tapahtui virhe :("
 
     if condition == "clouds":
-        keli = "Pilvistä ☁️☁️"
+        keli = "☁️☁️ Pilvistä ☁️☁️"
     elif condition == "fog":
-        keli = "Sumuista 🌫️🌫️"
+        keli = "🌫️🌫️ Sumuista 🌫️🌫️"
     elif condition == "snow":
-        keli = "Lumista ❄️❄️"
+        keli = "❄️❄️ Lumista ❄️❄️"
     elif condition == "rain":
-        keli = "Vetistä 🌧️🌧️"
+        keli = "🌧️🌧️ Vetistä 🌧️🌧️"
     elif condition == "clear":
-        keli = "Aurinkoista ☀️☀️"
+        keli = "☀️☀️ Aurinkoista ☀️☀️"
     elif condition == "mist":
-        keli = "Usvaista 🌫️🌫️"
+        keli = "🌫️🌫️ Usvaista 🌫️🌫️"
     elif condition == "drizzle":
-        keli = "tihkuista 🌧️"
+        keli = "🌧️ tihkuista 🌧️"
     else:
         keli = condition
 
-    aurinkonousee = w.sunrise_time()+7200
-    aurinkolaskee = w.sunset_time()+7200
+    aurinkonousee = datetime.utcfromtimestamp(w.sunrise_time() + 7200).strftime("%H:%M")
+    aurinkolaskee = datetime.utcfromtimestamp(w.sunset_time() + 7200).strftime("%H:%M")
 
-    aurinkonousee = datetime.utcfromtimestamp(aurinkonousee).strftime("%H:%M")
-    aurinkolaskee = datetime.utcfromtimestamp(aurinkolaskee).strftime("%H:%M")
+    palautus = keli + "\n🌡️: " + ", ".join(tempit) +  \
+               "\n🌬: " + str(weather.wind(unit='meters_sec')['speed']) + " m/s" + \
+               "\n🌅: " + str(aurinkonousee) + "\n🌇: "+ str(aurinkolaskee) + "\n"
 
-
-
-    return "Sää: {0} \n🌡️: {1} \n".format(keli, ", ".join(tempit) + "\n🌅: " + str(aurinkonousee) + "\n🌇: "+ str(aurinkolaskee))
+    return palautus
 
 
 def nimi():
@@ -86,13 +86,18 @@ def nimi():
 
     if len(nimet) > 1:
         return "Nimipäivät: " + ", ".join(nimet)
+
     elif len(nimet) == 1:
         return "Nimipäivä: " + ", ".join(nimet)
+
     return "Ei nimipäiviä!"
 
 
 def fakta(d, m):
-    kuukausidict = {1: 'tammikuuta', 2: 'helmikuuta', 3: 'maaliskuuta', 4: 'huhtikuuta', 5: 'toukokuuta', 6: 'kesäkuuta', 7: 'heinäkuuta', 8: 'elokuuta', 9: 'syyskuuta', 10: 'lokakuuta', 11: 'marraskuuta', 12: 'joulukuuta'}
+
+    kuukausidict = {1: 'tammikuuta', 2: 'helmikuuta', 3: 'maaliskuuta', 4: 'huhtikuuta', 
+                    5: 'toukokuuta', 6: 'kesäkuuta', 7: 'heinäkuuta', 8: 'elokuuta', 
+                    9: 'syyskuuta', 10: 'lokakuuta', 11: 'marraskuuta', 12: 'joulukuuta'}
 
     urli = "https://fi.m.wikipedia.org/wiki/" + str(d) + "._" + kuukausidict[m]
 
@@ -100,11 +105,8 @@ def fakta(d, m):
 
     lista = []
     a = soup.prettify()
-    a = a.split("Tapahtumia")[5].split('id="syn')[0]
-    a = a.replace("</li>", "??!!??")
-    a = re.sub('\s+', ' ', re.sub(r'<.*?>', "", a))
-    a = a.replace("<span", "").replace('"> Muokkaa', "")
-    a = a.split("Syntyneitä")
+    a = a.split("Tapahtumia")[5].split('id="syn')[0].replace("</li>", "??!!??")
+    a = re.sub('\s+', ' ', re.sub(r'<.*?>', "", a)).replace("<span", "").replace('"> Muokkaa', "").split("Syntyneitä")
     lista = a[0].split("??!!??")
     del lista[-1]
     
@@ -168,14 +170,13 @@ def main():
         else:
             chat_id = cfg['TELEGRAM']['id']
 
-
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
     viesti = pvm() + "\n\n" + saa(owm) + "\n" + \
-             nimi() + "\n\n" + fakta(today.day, today.month) + "\n\n" + \
-             liputus() + "\n\n"
-             #korona(True) + "\n\n" + \
-             #korona(False) + "\n\n"
+             nimi() + "\n\n" + fakta(today.day, today.month)
+             # liputus() + "\n\n"
+             # korona(True) + "\n\n" + \
+             # korona(False) + "\n\n"
 
     send(bot, viesti, chat_id)
     # print(viesti)
