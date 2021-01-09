@@ -24,23 +24,27 @@ def pvm():
 def saa(owm):
     # Likainen try except :)
     try:
-        observation = owm.weather_at_place('Tampere,FI')
-        w = observation.get_weather()
+        mgr = owm.weather_manager()
+        observation = mgr.weather_at_place('Tampere,FI')
+
+        w = observation.weather
 
         # Tiettyyn kellonaikaan
-        forecaster = owm.three_hours_forecast('Tampere,FI')
+        forecaster = mgr.forecast_at_place('Tampere,FI', '3h', 10)
         tempit = []
-        ajat = [1, 5, 12, 17]
+        ajat = [3, 5, 12, 17]
         for kellot in ajat:
             time = datetime.now() + timedelta(days=0, hours=kellot)
             weather = forecaster.get_weather_at(time)
-            temppis = weather.get_temperature(unit='celsius')['temp']
+            temppis = weather.temperature(unit='celsius')['temp']
             tempit.append(str(round(temppis,1)) + "°C")
+            # print(str(kellot) + " : " + str(temppis))
 
         condition = str(w).split('status=')[1][:-1].lower().split(",")[0]
         keli = condition
 
     except Exception as e:
+        print(e)
         return "Sään hakemisessa tapahtui virhe :("
 
     if condition == "clouds":
@@ -60,8 +64,8 @@ def saa(owm):
     else:
         keli = condition
 
-    aurinkonousee = w.get_sunrise_time()+7200
-    aurinkolaskee = w.get_sunset_time()+7200
+    aurinkonousee = w.sunrise_time()+7200
+    aurinkolaskee = w.sunset_time()+7200
 
     aurinkonousee = datetime.utcfromtimestamp(aurinkonousee).strftime("%H:%M")
     aurinkolaskee = datetime.utcfromtimestamp(aurinkolaskee).strftime("%H:%M")
@@ -150,8 +154,8 @@ def main():
     today = datetime.now()
     
     cfg = ConfigParser()
-    cfg.read('/home/sampo/Coding/python/today/env.cfg')
-    #cfg.read('env.cfg')
+    #cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
