@@ -13,6 +13,7 @@ import re
 from sys import argv
 
 
+
 def send(bot, msg, chat_id):
     bot.send_message(chat_id=chat_id, text=str(msg))
 
@@ -156,19 +157,19 @@ def main():
     today = datetime.now()
     
     cfg = ConfigParser()
-    cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    cfg.read('env.cfg')
     #cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
     # Paljon parempi kuin ennen
     if len(argv) == 1:
-        chat_id = cfg['TELEGRAM']['id']
+        chat_id = cfg['TELEGRAM']['real']
     else:
         if argv[1] == "tuotanto":
-            chat_id = cfg['TELEGRAM']['real']
-        else:
             chat_id = cfg['TELEGRAM']['id']
+        else:
+            chat_id = cfg['TELEGRAM']['real']
 
     owm = pyowm.OWM(cfg['PYOWM']['token'])
 
