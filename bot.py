@@ -156,8 +156,8 @@ def main():
     today = datetime.now()
     
     cfg = ConfigParser()
-    #cfg.read('/home/sampo/Coding/python/today/env.cfg')
-    cfg.read('env.cfg')
+    cfg.read('/home/sampo/Coding/python/today/env.cfg')
+    #cfg.read('env.cfg')
 
     bot = Bot(token=cfg['TELEGRAM']['token'])
 
